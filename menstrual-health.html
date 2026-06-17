@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Menstrual Health Monitoring &amp; Risk Detection | Nina Aulia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #FEF2F4;
+    --bg-panel:  #ffffff;
+    --bg-card:   #ffffff;
+    --pink:      #D96098;
+    --rose:      #e84c7d;
+    --rose-mid:  #f4a7c0;
+    --rose-light:#fce8ef;
+    --navy:      #325288;
+    --teal:      #24A19C;
+    --teal1:     #0ABAB5;
+    --teal2:     #56DFCF;
+    --teal3:     #8ACCD5;
+    --muted:     #E7CCCC;
+    --text:      #325288;
+    --text-dim:  #6a7f9a;
+    --border:    #E7CCCC;
+    --font-body: 'DM Serif Display', Georgia, serif;
+    --font-ui:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+    --radius:    12px;
+  }
+
+  /* Back button */
+  #back-btn {
+    position: fixed;
+    top: 16px;
+    left: 20px;
+    z-index: 1001;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px 7px 10px;
+    background: var(--bg-panel);
+    color: var(--navy);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 10px rgba(50,82,136,0.10);
+    transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  #back-btn:hover {
+    background: var(--rose);
+    color: #fff;
+    border-color: var(--rose);
+    box-shadow: 0 4px 16px rgba(232,76,125,0.22);
+  }
+  #back-btn svg { flex-shrink: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--navy);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.75;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Progress bar */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--rose), var(--rose-mid));
+    z-index: 1000;
+    transition: width 0.1s linear;
+  }
+
+  /* Nav dots */
+  #nav-dots {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 999;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    border: 1.5px solid var(--pink);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .nav-dot.active {
+    background: var(--rose);
+    transform: scale(1.45);
+    border-color: var(--rose);
+  }
+
+  /* Scrolly layout */
+  .scrolly-section {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Left sticky narrative */
+  .narrative {
+    position: sticky;
+    top: 0;
+    width: 42%;
+    min-width: 320px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 56px 52px 56px 60px;
+    border-right: 1px solid var(--border);
+    background: var(--bg-panel);
+    z-index: 10;
+  }
+
+  .section-num {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-num::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1.5px;
+    background: var(--rose);
+    flex-shrink: 0;
+  }
+
+  .narrative h1 {
+    font-family: var(--font-body);
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-weight: 400;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .narrative p {
+    font-family: var(--font-ui);
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .narrative ul {
+    list-style: none;
+    margin-bottom: 14px;
+  }
+  .narrative ul li {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 3px 0 3px 18px;
+    position: relative;
+  }
+  .narrative ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--rose);
+    font-size: 11px;
+  }
+
+  .source-note {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    color: #a0afc0;
+    line-height: 1.7;
+  }
+  .source-note a {
+    color: var(--teal);
+    text-decoration: none;
+  }
+  .source-note a:hover { text-decoration: underline; }
+
+  /* Right viz panel */
+  .viz-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 52px;
+    min-height: 100vh;
+    background: var(--bg);
+  }
+
+  .viz-inner {
+    width: 100%;
+    max-width: 660px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .viz-inner.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Image placeholder */
+  .img-placeholder {
+    width: 100%;
+    aspect-ratio: 16/10;
+    background: var(--rose-light);
+    border: 2px dashed var(--rose-mid);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    color: var(--rose);
+    box-shadow: 0 8px 32px rgba(217,96,152,0.10);
+  }
+  .img-placeholder svg { opacity: 0.45; }
+  .img-placeholder span {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* Section image (real screenshots, same footprint as .img-placeholder) */
+  .viz-image {
+    width: 100%;
+    display: block;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(217,96,152,0.10);
+    border: 1px solid var(--border);
+  }
+
+  /* Buttons */
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: var(--rose);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: #c73565; transform: translateY(-1px); }
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    background: transparent;
+    color: var(--rose);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--rose);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-outline:hover { background: var(--rose-light); transform: translateY(-1px); }
+
+  /* Highlight box */
+  .highlight-box {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: var(--rose-light);
+    border-left: 3px solid var(--rose);
+    border-radius: 0 6px 6px 0;
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  /* Tag grid */
+  .tag-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+  }
+  .tag {
+    padding: 4px 11px;
+    background: var(--rose-light);
+    color: var(--rose);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 20px;
+    border: 1px solid var(--rose-mid);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .scrolly-section { flex-direction: column; }
+    .narrative {
+      position: relative;
+      width: 100%;
+      height: auto;
+      padding: 56px 28px 40px;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .viz-panel { padding: 40px 28px; }
+    #nav-dots { display: none; }
+    #back-btn { top: 14px; left: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="index.html" id="back-btn" aria-label="Back to home">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Back
+</a>
+
+<div id="progress-bar"></div>
+
+<nav id="nav-dots">
+  <div class="nav-dot active" data-idx="0" onclick="scrollToSlide(0)"></div>
+  <div class="nav-dot" data-idx="1" onclick="scrollToSlide(1)"></div>
+  <div class="nav-dot" data-idx="2" onclick="scrollToSlide(2)"></div>
+</nav>
+
+<!-- SLIDE 1 — PROJECT OVERVIEW -->
+<section class="scrolly-section" id="slide-1">
+  <div class="narrative">
+    <div class="section-num">Section 01</div>
+    <h1>Menstrual Health Monitoring &amp; Risk Detection</h1>
+    <p>This project demonstrates how Data Science and Machine Learning can support menstrual health monitoring through predictive analytics and anomaly detection.</p>
+    <p>Using synthetic menstrual cycle data from 100 users, the system combines four analytical approaches:</p>
+    <ul>
+      <li>Exploratory Data Analysis (EDA)</li>
+      <li>Classification Modeling</li>
+      <li>Time-Series Forecasting</li>
+      <li>Anomaly Detection</li>
+    </ul>
+    <p style="margin-top:14px;">Key contributions include a risk detection framework, predictive forecasting, and an interactive Streamlit dashboard.</p>
+    <div class="tag-grid" style="margin-bottom:4px;">
+      <span class="tag">Python</span><span class="tag">Scikit-Learn</span><span class="tag">XGBoost</span>
+      <span class="tag">TensorFlow</span><span class="tag">Plotly</span><span class="tag">Streamlit</span>
+    </div>
+    <div class="btn-group">
+      <a href="https://menstrual-health-monitoring-risk-detection.streamlit.app/" target="_blank" class="btn-primary">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 2a9 9 0 010 12M2 8h12"/></svg>
+        Live Demo
+      </a>
+      <a href="https://github.com/ninaaulia/menstrual-health-app" target="_blank" class="btn-outline">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <div class="source-note">
+      Dataset: Kaggle — Menstrual Cycle Data with Factors<br>
+      <a href="https://www.kaggle.com/datasets/akshayas02/menstrual-cycle-data-with-factors-dataset/data" target="_blank">View on Kaggle</a>
+    </div>
+  </div>
+  <div class="viz-panel">
+    <div class="viz-inner" id="viz-1">
+      <img class="viz-image" src="images/menstrual-health/section_1.png" alt="Menstrual Health Monitoring & Risk Detection — Project Overview">
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2 — DATASET & EDA -->
+<section class="scrolly-section" id="slide-2">
+  <div class="narrative">
+    <div class="section-num">Section 02</div>
+    <h1>Dataset Source &amp; Exploratory Analysis</h1>
+    <p>The dataset contains synthetic menstrual cycle data from 100 users, designed to support predictive modeling and factor analysis in menstrual health research.</p>
+    <p>EDA examines relationships between:</p>
+    <ul>
+      <li>Cycle Length &amp; Period Length</li>
+      <li>Stress Level</li>
+      <li>BMI</li>
+      <li>Sleep Hours</li>
+    </ul>
+    <div class="highlight-box">
+      Goal: uncover patterns and correlations that signal cycle irregularities — before any model is trained.
+    </div>
+    <div class="source-note">
+      Dataset: <a href="https://www.kaggle.com/datasets/akshayas02/menstrual-cycle-data-with-factors-dataset/data" target="_blank">Kaggle — akshayas02</a><br>
+      Synthetic data · 100 users · 11 features
+    </div>
+  </div>
+  <div class="viz-panel">
+    <div class="viz-inner" id="viz-2">
+      <img class="viz-image" src="images/menstrual-health/section_2.png" alt="EDA Dashboard — Menstrual Health Data Exploration">
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3 — MODELING APPROACHES -->
+<section class="scrolly-section" id="slide-3">
+  <div class="narrative">
+    <div class="section-num">Section 03</div>
+    <h1>Modeling Approaches</h1>
+    <p>Three complementary ML techniques address different dimensions of menstrual health monitoring:</p>
+    <ul>
+      <li><strong style="color:var(--navy);">Classification</strong> — binary target <code style="font-size:11px;background:var(--rose-light);color:var(--rose);padding:1px 5px;border-radius:3px;">irregular_cycle</code> (Logistic Regression, Random Forest, XGBoost)</li>
+      <li><strong style="color:var(--navy);">Forecasting</strong> — ARIMA &amp; LSTM predict future cycle length using historical patterns; evaluated with MAE &amp; RMSE</li>
+      <li><strong style="color:var(--navy);">Anomaly Detection</strong> — Isolation Forest (contamination 0.1) with PCA visualization detects unusual patterns without labeled data</li>
+    </ul>
+    <div class="btn-group">
+      <a href="https://menstrual-health-monitoring-risk-detection.streamlit.app/" target="_blank" class="btn-primary">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 2a9 9 0 010 12M2 8h12"/></svg>
+        Explore the App
+      </a>
+      <a href="https://github.com/ninaaulia/menstrual-health-app" target="_blank" class="btn-outline">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <div class="source-note">
+      Technologies: Pandas · Scikit-Learn · XGBoost · Statsmodels · TensorFlow · Plotly · Streamlit
+    </div>
+  </div>
+  <div class="viz-panel">
+    <div class="viz-inner" id="viz-3">
+      <img class="viz-image" src="images/menstrual-health/section_3.png" alt="ML Prediction Dashboard — Classification, Forecasting & Anomaly Detection">
+    </div>
+  </div>
+</section>
+
+<script>
+const slides = [
+  document.getElementById('slide-1'),
+  document.getElementById('slide-2'),
+  document.getElementById('slide-3'),
+];
+const vizEls = [
+  document.getElementById('viz-1'),
+  document.getElementById('viz-2'),
+  document.getElementById('viz-3'),
+];
+const dots = document.querySelectorAll('.nav-dot');
+const pBar = document.getElementById('progress-bar');
+
+function scrollToSlide(idx) { slides[idx].scrollIntoView({ behavior: 'smooth' }); }
+
+function onScroll() {
+  const st = window.scrollY;
+  const dh = document.body.scrollHeight - window.innerHeight;
+  pBar.style.width = Math.min(100, (st / dh) * 100) + '%';
+
+  slides.forEach((slide, i) => {
+    const r = slide.getBoundingClientRect();
+    if (r.top < window.innerHeight * 0.6 && r.bottom > window.innerHeight * 0.4) {
+      dots.forEach(d => d.classList.remove('active'));
+      dots[i].classList.add('active');
+    }
+    if (r.top < window.innerHeight * 0.88) {
+      vizEls[i].classList.add('visible');
+    }
+  });
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+</script>
+</body>
+</html>
